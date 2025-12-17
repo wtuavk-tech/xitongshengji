@@ -59,7 +59,7 @@ const DEFAULT_DATA: NavItem[] = [
   {
     "id": "1765865340448",
     "url": "https://shifuluru.pages.dev/",
-    "title": "师傅录入",
+    "title": "师傅库",
     "timestamp": 1765865340448
   },
   {
@@ -172,7 +172,7 @@ const ORDER_MANAGEMENT_TITLES = new Set([
   "直排订单", "直派订单", "直派订单页",
   "派单业绩",
   "单库", "单库页",
-  "师傅录入",
+  "师傅录入", "师傅库",
   "原始订单", "原始订单页",
   "售后管理页", "售后管理",
   "长期订单", "长期订单页",
