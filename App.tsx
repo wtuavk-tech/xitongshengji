@@ -33,12 +33,6 @@ const DEFAULT_DATA: NavItem[] = [
     "timestamp": 1765770834252
   },
   {
-    "id": "1765869420209",
-    "url": "https://wangongshenhe.pages.dev/",
-    "title": "完工审核页",
-    "timestamp": 1765869420209
-  },
-  {
     "id": "3",
     "url": "https://dingdanguanli1.pages.dev/",
     "title": "订单管理页",
@@ -157,22 +151,32 @@ const DEFAULT_DATA: NavItem[] = [
     "url": "https://dairudanku.pages.dev/",
     "title": "待入单库",
     "timestamp": 1765953857186
+  },
+  {
+    "id": "1766025295066",
+    "url": "https://quanxianguanli.pages.dev/",
+    "title": "权限管理",
+    "timestamp": 1766025295066
   }
 ];
 
-// 需要归类到“订单管理”的项目标题列表
+// 师傅管理分类
+const MASTER_MANAGEMENT_TITLES = new Set([
+  "师傅库", "师傅录入",
+  "师傅黑名单", "师傅黑名单页"
+]);
+
+// 订单管理分类
 const ORDER_MANAGEMENT_TITLES = new Set([
   "订单管理", "订单管理页",
   "录单大厅",
   "派单员页",
   "待入单库",
-  "师傅黑名单", "师傅黑名单页",
   "订单收款", "订单收款页",
   "报错订单", "报错订单页",
   "直排订单", "直派订单", "直派订单页",
   "派单业绩",
   "单库", "单库页",
-  "师傅录入", "师傅库",
   "原始订单", "原始订单页",
   "售后管理页", "售后管理",
   "长期订单", "长期订单页",
@@ -377,30 +381,42 @@ const App: React.FC = () => {
   // 处理分组渲染逻辑
   const renderSidebarContent = () => {
     const groupedStructure: (NavItem | { type: 'group'; key: string; title: string; children: NavItem[] })[] = [];
+    
+    // Group Arrays and Flags
     const orderGroupChildren: NavItem[] = [];
     let orderGroupAdded = false;
+
+    const masterGroupChildren: NavItem[] = [];
+    let masterGroupAdded = false;
 
     // 第一次遍历：分离分组项和普通项
     items.forEach(item => {
       if (ORDER_MANAGEMENT_TITLES.has(item.title)) {
         orderGroupChildren.push(item);
-        // 如果还没有添加分组占位符，添加它（仅一次）
         if (!orderGroupAdded) {
           groupedStructure.push({
             type: 'group',
             key: 'group-order-management',
             title: '订单管理',
-            children: orderGroupChildren // 引用同一个数组，后续push也会更新这里
+            children: orderGroupChildren
           });
           orderGroupAdded = true;
+        }
+      } else if (MASTER_MANAGEMENT_TITLES.has(item.title)) {
+        masterGroupChildren.push(item);
+        if (!masterGroupAdded) {
+          groupedStructure.push({
+            type: 'group',
+            key: 'group-master-management',
+            title: '师傅管理',
+            children: masterGroupChildren
+          });
+          masterGroupAdded = true;
         }
       } else {
         groupedStructure.push(item);
       }
     });
-
-    // 如果分组内没有元素（都被删除了），则从渲染列表中移除该分组（可选，这里保留空分组也可以，或者根据 children.length 过滤）
-    // 为了保持界面整洁，如果分组为空，可以不渲染。
 
     return groupedStructure.map(node => {
       if ('type' in node && node.type === 'group') {
@@ -408,7 +424,7 @@ const App: React.FC = () => {
         if (node.children.length === 0) return null;
         
         const isExpanded = expandedGroups.has(node.key);
-        // 检查分组内是否有当前激活的链接（可选：用于自动高亮分组标题）
+        // 检查分组内是否有当前激活的链接
         const hasActiveChild = node.children.some(child => child.url === activeUrl);
 
         return (

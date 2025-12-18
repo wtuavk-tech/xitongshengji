@@ -24,12 +24,6 @@
     "timestamp": 1765770834252
   },
   {
-    "id": "1765869420209",
-    "url": "https://wangongshenhe.pages.dev/",
-    "title": "完工审核页",
-    "timestamp": 1765869420209
-  },
-  {
     "id": "3",
     "url": "https://dingdanguanli1.pages.dev/",
     "title": "订单管理页",
@@ -148,5 +142,11 @@
     "url": "https://dairudanku.pages.dev/",
     "title": "待入单库",
     "timestamp": 1765953857186
+  },
+  {
+    "id": "1766025295066",
+    "url": "https://quanxianguanli.pages.dev/",
+    "title": "权限管理",
+    "timestamp": 1766025295066
   }
 ]
