@@ -6,7 +6,7 @@ import { NavItem } from './types';
 // 本地存储的 Key
 const STORAGE_KEY = 'sys_upgrade_nav_data_v1';
 
-// 用户指定的固定数据
+// 用户指定的固定数据，严格按照用户提供的 JSON 内容
 const DEFAULT_DATA: NavItem[] = [
   {
     "id": "home-nav",
@@ -25,12 +25,6 @@ const DEFAULT_DATA: NavItem[] = [
     "url": "https://shouyeguanli.pages.dev/",
     "title": "数据管理",
     "timestamp": 1766127599481
-  },
-  {
-    "id": "1765863229413",
-    "url": "https://paidanyuanshuju1.pages.dev/",
-    "title": "数据分析",
-    "timestamp": 1765863229413
   },
   {
     "id": "1766124649937",
@@ -343,25 +337,15 @@ const App: React.FC = () => {
   };
 
   const renderIcon = (title: string) => {
-    // 首页导航 - 房子
     if (title.includes('首页')) return <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>;
-    // 工作日报 - 剪贴板勾选
     if (title.includes('日报')) return <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>;
-    // 数据管理 - 数据库
     if (title.includes('数据管理')) return <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" /></svg>;
-    // 数据分析 - 趋势统计图
     if (title.includes('分析')) return <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" /></svg>;
-    // 第三方店铺 - 购物袋
     if (title.includes('店铺')) return <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>;
-    // 订单管理 (组/项) - 列表/文档
     if (title.includes('订单')) return <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>;
-    // 师傅管理 - 工具/人员图标
     if (title.includes('师傅')) return <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m12 6a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>;
-    // 权限管理 - 盾牌/锁定
     if (title.includes('权限')) return <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>;
-    // 财务管理 - 银行/钱币
     if (title.includes('财务')) return <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
-    // 营销管理 - 喇叭/广播
     if (title.includes('营销')) return <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" /></svg>;
     
     return <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
@@ -371,7 +355,7 @@ const App: React.FC = () => {
     <li key={item.id} className="relative group border-b border-white/10 last:border-0">
       <button
         onClick={() => setActiveUrl(item.url)}
-        className={`w-full flex flex-col items-center justify-center text-center py-5 text-lg font-sans transition-all border-l-4 ${
+        className={`w-full flex flex-col items-center justify-center text-center py-[13.6px] text-lg font-sans transition-all border-l-4 ${
           activeUrl === item.url 
           ? 'border-blue-400 bg-blue-600 text-white' 
           : 'border-transparent text-white/80 hover:bg-blue-800 hover:text-white'
@@ -418,7 +402,7 @@ const App: React.FC = () => {
           <li key={node.key} className="border-b border-white/10">
              <button 
                onClick={() => toggleGroup(node.key)} 
-               className={`w-full flex flex-col items-center justify-center text-center py-5 text-lg font-bold font-sans transition-all hover:bg-blue-800 ${hasActiveChild ? 'bg-blue-700 text-white' : 'text-white/90'}`}
+               className={`w-full flex flex-col items-center justify-center text-center py-[13.6px] text-lg font-bold font-sans transition-all hover:bg-blue-800 ${hasActiveChild ? 'bg-blue-700 text-white' : 'text-white/90'}`}
              >
                 <div className="mb-2">{renderIcon(node.title)}</div>
                 <div className="flex items-center gap-1 justify-center px-2">
@@ -426,7 +410,7 @@ const App: React.FC = () => {
                     <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 shrink-0 transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`} viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" /></svg>
                 </div>
              </button>
-             <div className={`overflow-hidden transition-all duration-300 ease-in-out bg-black/20 ${isExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'}`}>
+             <div className={`overflow-hidden transition-all duration-300 ease-in-out bg-[#1e40af] ${isExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'}`}>
                 <ul className="border-t border-white/5">{node.children.map(child => renderNavItem(child, true))}</ul>
              </div>
           </li>
@@ -452,7 +436,7 @@ const App: React.FC = () => {
                 <div className="p-3 border-t border-white/10 bg-black/10">
                     <button 
                         onClick={() => { setEditingItem(null); setIsModalOpen(true); }} 
-                        className="w-full flex flex-col items-center justify-center gap-1 py-3 bg-white/10 border border-white/20 text-white rounded text-sm font-sans hover:bg-blue-600 hover:border-blue-400 transition-all shadow-sm"
+                        className="w-full flex flex-col items-center justify-center gap-1 py-[8.5px] bg-white/10 border border-white/20 text-white rounded text-sm font-sans hover:bg-blue-600 hover:border-blue-400 transition-all shadow-sm"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
                         <span className="truncate">初始化模块</span>
