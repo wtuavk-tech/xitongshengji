@@ -160,7 +160,6 @@ const DEFAULT_DATA: NavItem[] = [
   }
 ];
 
-// 订单管理分类 - 已移除师傅库相关项，使其成为一级导航
 const ORDER_MANAGEMENT_TITLES = new Set([
   "订单管理", "订单管理页",
   "录单大厅",
@@ -319,21 +318,32 @@ const App: React.FC = () => {
     setEditingItem(null);
   };
 
+  const renderIcon = (title: string) => {
+    if (title.includes('首页')) return <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>;
+    if (title.includes('分析')) return <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>;
+    if (title.includes('订单')) return <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>;
+    if (title.includes('财务')) return <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
+    if (title.includes('权限')) return <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>;
+    if (title.includes('管理')) return <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>;
+    return <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
+  };
+
   const renderNavItem = (item: NavItem, isChild = false) => (
-    <li key={item.id} className="relative group border-b border-gray-100 last:border-0">
+    <li key={item.id} className="relative group border-b border-white/10 last:border-0">
       <button
         onClick={() => setActiveUrl(item.url)}
-        className={`w-full text-left py-3 text-xs font-medium transition-all border-l-2 ${isChild ? 'pl-6 pr-2' : 'px-2'} ${
+        className={`w-full flex flex-col items-center justify-center text-center py-5 text-lg font-sans transition-all border-l-4 ${
           activeUrl === item.url 
-          ? 'border-blue-500 bg-blue-50 text-blue-700' 
-          : 'border-transparent text-slate-600 hover:bg-gray-50 hover:text-slate-900'
+          ? 'border-blue-400 bg-blue-600 text-white' 
+          : 'border-transparent text-white/80 hover:bg-blue-800 hover:text-white'
         }`}
       >
-        <div className="truncate" title={item.title}>{item.title}</div>
+        <div className="mb-2">{renderIcon(item.title)}</div>
+        <div className="px-2 leading-tight break-words" title={item.title}>{item.title}</div>
       </button>
-      <div className="absolute right-1 top-1/2 -translate-y-1/2 hidden group-hover:flex items-center gap-0.5 bg-white/90 backdrop-blur-sm rounded shadow-sm p-0.5 z-10">
-        <button onClick={(e) => { e.stopPropagation(); handleEditClick(item); }} className="p-0.5 text-slate-400 hover:text-blue-500 rounded"><svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button>
-        <button onClick={(e) => { e.stopPropagation(); handleDeleteItem(item.id); }} className="p-0.5 text-slate-400 hover:text-red-500 rounded"><svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button>
+      <div className="absolute right-1 top-2 hidden group-hover:flex items-center gap-0.5 bg-black/30 backdrop-blur-sm rounded p-0.5 z-10">
+        <button onClick={(e) => { e.stopPropagation(); handleEditClick(item); }} className="p-1 text-white/50 hover:text-blue-300 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button>
+        <button onClick={(e) => { e.stopPropagation(); handleDeleteItem(item.id); }} className="p-1 text-white/50 hover:text-red-400 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button>
       </div>
     </li>
   );
@@ -366,15 +376,19 @@ const App: React.FC = () => {
         const isExpanded = expandedGroups.has(node.key);
         const hasActiveChild = node.children.some(child => child.url === activeUrl);
         return (
-          <li key={node.key} className="border-b border-gray-200">
-             <button onClick={() => toggleGroup(node.key)} className={`w-full flex items-center justify-between px-2 py-3 text-xs font-bold transition-all hover:bg-gray-50 ${hasActiveChild ? 'text-blue-800' : 'text-slate-700'}`}>
-                <div className="flex items-center gap-1 overflow-hidden">
-                    <svg xmlns="http://www.w3.org/2000/svg" className={`h-3 w-3 shrink-0 text-slate-400 transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`} viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" /></svg>
-                    <span className="truncate">{node.title}</span>
+          <li key={node.key} className="border-b border-white/10">
+             <button 
+               onClick={() => toggleGroup(node.key)} 
+               className={`w-full flex flex-col items-center justify-center text-center py-5 text-lg font-bold font-sans transition-all hover:bg-blue-800 ${hasActiveChild ? 'bg-blue-700 text-white' : 'text-white/90'}`}
+             >
+                <div className="mb-2">{renderIcon(node.title)}</div>
+                <div className="flex items-center gap-1 justify-center px-2">
+                    <span className="leading-tight">{node.title}</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 shrink-0 transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`} viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" /></svg>
                 </div>
              </button>
-             <div className={`overflow-hidden transition-all duration-300 ease-in-out bg-slate-50/50 ${isExpanded ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'}`}>
-                <ul className="border-t border-gray-100/50">{node.children.map(child => renderNavItem(child, true))}</ul>
+             <div className={`overflow-hidden transition-all duration-300 ease-in-out bg-black/20 ${isExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                <ul className="border-t border-white/5">{node.children.map(child => renderNavItem(child, true))}</ul>
              </div>
           </li>
         );
@@ -394,9 +408,18 @@ const App: React.FC = () => {
             </div>
         </header>
         <div className="flex flex-1 overflow-hidden">
-            <aside className="w-28 bg-white border-r border-gray-200 flex flex-col shrink-0 z-20">
+            {/* Deep Blue Sidebar (#001529) */}
+            <aside className="w-36 bg-[#001529] border-r border-white/10 flex flex-col shrink-0 z-20 transition-all duration-300">
                 <div className="flex-1 overflow-y-auto custom-scrollbar"><ul className="py-0">{renderSidebarContent()}</ul></div>
-                <div className="p-2 border-t border-gray-100 bg-gray-50"><button onClick={() => { setEditingItem(null); setIsModalOpen(true); }} className="w-full flex items-center justify-center gap-1 px-2 py-1.5 bg-white border border-gray-300 text-gray-700 rounded text-xs font-medium hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 transition-all shadow-sm"><svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg><span className="truncate">初始化模块</span></button></div>
+                <div className="p-3 border-t border-white/10 bg-black/10">
+                    <button 
+                        onClick={() => { setEditingItem(null); setIsModalOpen(true); }} 
+                        className="w-full flex flex-col items-center justify-center gap-1 py-3 bg-white/10 border border-white/20 text-white rounded text-sm font-sans hover:bg-blue-600 hover:border-blue-400 transition-all shadow-sm"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                        <span className="truncate">初始化模块</span>
+                    </button>
+                </div>
             </aside>
             <main className="flex-1 relative bg-slate-100 h-full w-full">{activeUrl ? (<iframe src={activeUrl} className="absolute inset-0 w-full h-full border-none bg-white" title="Content Preview" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-popups-to-escape-sandbox allow-presentation" />) : (<div className="flex items-center justify-center h-full text-gray-400"><p>请选择左侧导航项目</p></div>)}</main>
         </div>
