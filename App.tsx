@@ -17,7 +17,7 @@ const DEFAULT_DATA: NavItem[] = [
   {
     "id": "1765863229413",
     "url": "https://paidanyuanshuju1.pages.dev/",
-    "title": "派单员数据分析",
+    "title": "数据分析",
     "timestamp": 1765863229413
   },
   {
@@ -408,8 +408,8 @@ const App: React.FC = () => {
             </div>
         </header>
         <div className="flex flex-1 overflow-hidden">
-            {/* Deep Blue Sidebar (#001529) */}
-            <aside className="w-36 bg-[#001529] border-r border-white/10 flex flex-col shrink-0 z-20 transition-all duration-300">
+            {/* Deep Blue Sidebar (#001529) - Width reduced by 15% (w-36 is 144px -> w-[122px]) */}
+            <aside className="w-[122px] bg-[#001529] border-r border-white/10 flex flex-col shrink-0 z-20 transition-all duration-300">
                 <div className="flex-1 overflow-y-auto custom-scrollbar"><ul className="py-0">{renderSidebarContent()}</ul></div>
                 <div className="p-3 border-t border-white/10 bg-black/10">
                     <button 
