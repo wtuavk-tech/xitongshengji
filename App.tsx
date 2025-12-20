@@ -33,18 +33,6 @@ const DEFAULT_DATA: NavItem[] = [
     "timestamp": 1766124649937
   },
   {
-    "id": "3",
-    "url": "https://dingdanguanli1.pages.dev/",
-    "title": "订单管理页",
-    "timestamp": 1715000000000
-  },
-  {
-    "id": "dispatcher",
-    "url": "https://paidanyuan.pages.dev/",
-    "title": "派单员页",
-    "timestamp": 1715000000002
-  },
-  {
     "id": "4",
     "url": "https://shouhouguanli.pages.dev/",
     "title": "售后管理页",
@@ -55,78 +43,6 @@ const DEFAULT_DATA: NavItem[] = [
     "url": "https://ludandating.pages.dev/",
     "title": "录单大厅",
     "timestamp": 1765770834252
-  },
-  {
-    "id": "1765846048371",
-    "url": "https://danku-59j.pages.dev/",
-    "title": "单库页",
-    "timestamp": 1765846048371
-  },
-  {
-    "id": "1765938309622",
-    "url": "https://dingdanshouku.pages.dev/",
-    "title": "订单收款页",
-    "timestamp": 1765938309622
-  },
-  {
-    "id": "1765938335682",
-    "url": "https://baocuodingdan.pages.dev/",
-    "title": "报错订单页",
-    "timestamp": 1765938335682
-  },
-  {
-    "id": "1765938358648",
-    "url": "https://zhipaidingdan1.pages.dev/",
-    "title": "直派订单页",
-    "timestamp": 1765938358648
-  },
-  {
-    "id": "1765938389055",
-    "url": "https://paidanyeji.pages.dev/",
-    "title": "派单业绩",
-    "timestamp": 1765938389055
-  },
-  {
-    "id": "1765939188488",
-    "url": "https://yuanshidingdan.pages.dev/",
-    "title": "原始订单页",
-    "timestamp": 1765939188488
-  },
-  {
-    "id": "1765939498767",
-    "url": "https://changqidingdan.pages.dev/",
-    "title": "长期订单页",
-    "timestamp": 1765939498767
-  },
-  {
-    "id": "1765939589456",
-    "url": "https://zhuanpaijilu.pages.dev/",
-    "title": "转派记录页",
-    "timestamp": 1765939589456
-  },
-  {
-    "id": "1765940326326",
-    "url": "https://paidanjilu.pages.dev/",
-    "title": "派单记录页",
-    "timestamp": 1765940326326
-  },
-  {
-    "id": "1765941888712",
-    "url": "https://ludanjiage.pages.dev/",
-    "title": "录单价格页",
-    "timestamp": 1765941888712
-  },
-  {
-    "id": "1765950001916",
-    "url": "https://baojiaye.pages.dev/",
-    "title": "报价页",
-    "timestamp": 1765950001916
-  },
-  {
-    "id": "1765953857186",
-    "url": "https://dairudanku.pages.dev/",
-    "title": "待入单库",
-    "timestamp": 1765953857186
   },
   {
     "id": "1765865340448",
@@ -157,6 +73,18 @@ const DEFAULT_DATA: NavItem[] = [
     "url": "https://xiangmuguanli.pages.dev/",
     "title": "项目管理",
     "timestamp": 1766202927722
+  },
+  {
+    "id": "1766216698492",
+    "url": "https://paidanyuan.pages.dev/",
+    "title": "派单大厅",
+    "timestamp": 1766216698492
+  },
+  {
+    "id": "1766221507325",
+    "url": "https://dingdanguanli2.pages.dev/",
+    "title": "订单管理 ",
+    "timestamp": 1766221507325
   }
 ];
 
