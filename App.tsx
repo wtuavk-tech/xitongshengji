@@ -111,40 +111,16 @@ const DEFAULT_DATA: NavItem[] = [
     "timestamp": 1765940326326
   },
   {
-    "id": "1765941266543",
-    "url": "https://diyuxiangmujiage.pages.dev/",
-    "title": "地域项目价格页",
-    "timestamp": 1765941266543
-  },
-  {
-    "id": "1765941721016",
-    "url": "https://haopingfanxian.pages.dev/",
-    "title": "好评返现",
-    "timestamp": 1765941721016
-  },
-  {
     "id": "1765941888712",
     "url": "https://ludanjiage.pages.dev/",
     "title": "录单价格页",
     "timestamp": 1765941888712
   },
   {
-    "id": "1765943337256",
-    "url": "https://yonghuheimingdan.pages.dev/",
-    "title": "用户黑名单",
-    "timestamp": 1765943337256
-  },
-  {
     "id": "1765950001916",
     "url": "https://baojiaye.pages.dev/",
     "title": "报价页",
     "timestamp": 1765950001916
-  },
-  {
-    "id": "1765950938732",
-    "url": "https://xiangmuzhibao.pages.dev/",
-    "title": "项目质保",
-    "timestamp": 1765950938732
   },
   {
     "id": "1765953857186",
@@ -175,32 +151,37 @@ const DEFAULT_DATA: NavItem[] = [
     "url": "https://yingxiaoguanli.pages.dev/",
     "title": "营销管理",
     "timestamp": 1766127895281
+  },
+  {
+    "id": "1766202927722",
+    "url": "https://xiangmuguanli.pages.dev/",
+    "title": "项目管理",
+    "timestamp": 1766202927722
   }
 ];
 
-const ORDER_MANAGEMENT_TITLES = new Set([
-  "订单管理", "订单管理页",
-  "录单大厅",
-  "派单员页",
-  "待入单库",
-  "订单收款", "订单收款页",
-  "报错订单", "报错订单页",
-  "直排订单", "直派订单", "直派订单页",
-  "派单业绩",
-  "单库", "单库页",
-  "原始订单", "原始订单页",
-  "售后管理页", "售后管理",
-  "长期订单", "长期订单页",
-  "转派记录", "转派记录页",
-  "派单记录", "派单记录页",
-  "改单记录", "改单记录页",
-  "地域项目价格", "地域项目价格页",
-  "好评返现",
-  "录单价格", "录单价格页",
-  "用户黑名单",
-  "报价", "报价页",
-  "项目质保"
+// Helper to clean titles
+const cleanTitle = (title: string) => title.replace(/页$/, '');
+
+const ORDER_MANAGEMENT_ITEMS = new Set([
+  "派单员页", "待入单库", "订单收款页", "报错订单页", "直派订单页", 
+  "派单业绩", "单库页", "原始订单页", "长期订单页", "转派记录页", 
+  "派单记录页", "录单价格页", "报价页", "订单管理页", "订单管理", 
+  "订单收款", "报错订单", "直排订单", "直派订单", "单库", 
+  "原始订单", "长期订单", "转派记录", "派单记录", "改单记录", "改单记录页", 
+  "录单价格", "报价"
 ]);
+
+const PROJECT_MANAGEMENT_ITEMS = new Set([
+  "地域项目价格", "地域项目价格页", "好评返现", "用户黑名单", "项目质保"
+]);
+
+const INDEPENDENT_ITEMS = new Set([
+  "录单大厅", "售后管理", "售后管理页"
+]);
+
+// Type for Sidebar Nodes
+type SidebarNode = NavItem | { type: 'group'; key: string; title: string; children: NavItem[] };
 
 const App: React.FC = () => {
   const [items, setItems] = useState<NavItem[]>(() => {
@@ -234,6 +215,11 @@ const App: React.FC = () => {
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<NavItem | null>(null);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+  
+  // Drag and Drop State
+  const [sidebarOrder, setSidebarOrder] = useState<string[]>([]);
+  const dragItem = useRef<number | null>(null);
+  const dragOverItem = useRef<number | null>(null);
 
   const toggleGroup = (groupKey: string) => {
     setExpandedGroups(prev => {
@@ -338,16 +324,17 @@ const App: React.FC = () => {
 
   const renderIcon = (title: string, sizeClass = "w-[17px] h-[17px]") => {
     const iconProps = { className: sizeClass, fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" };
-    if (title.includes('首页')) return <svg {...iconProps}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>;
-    if (title.includes('日报')) return <svg {...iconProps}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>;
-    if (title.includes('数据管理')) return <svg {...iconProps}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" /></svg>;
-    if (title.includes('分析')) return <svg {...iconProps}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" /></svg>;
-    if (title.includes('店铺')) return <svg {...iconProps}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>;
-    if (title.includes('订单')) return <svg {...iconProps}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>;
-    if (title.includes('师傅')) return <svg {...iconProps}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m12 6a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>;
-    if (title.includes('权限')) return <svg {...iconProps}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>;
-    if (title.includes('财务')) return <svg {...iconProps}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
-    if (title.includes('营销')) return <svg {...iconProps}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" /></svg>;
+    const t = cleanTitle(title);
+    if (t.includes('首页')) return <svg {...iconProps}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>;
+    if (t.includes('日报')) return <svg {...iconProps}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>;
+    if (t.includes('数据管理') || t.includes('项目')) return <svg {...iconProps}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" /></svg>;
+    if (t.includes('分析')) return <svg {...iconProps}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" /></svg>;
+    if (t.includes('店铺')) return <svg {...iconProps}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>;
+    if (t.includes('订单')) return <svg {...iconProps}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>;
+    if (t.includes('师傅')) return <svg {...iconProps}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m12 6a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>;
+    if (t.includes('权限')) return <svg {...iconProps}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>;
+    if (t.includes('财务')) return <svg {...iconProps}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
+    if (t.includes('营销')) return <svg {...iconProps}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" /></svg>;
     
     return <svg {...iconProps}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
   };
@@ -365,8 +352,8 @@ const App: React.FC = () => {
         <div className="shrink-0 mr-2">
           {renderIcon(item.title, isChild ? "w-[11px] h-[11px]" : "w-[17px] h-[17px]")}
         </div>
-        <div className={`leading-tight font-sans truncate ${isChild ? 'text-[13.46px]' : 'text-[14.3px]'}`} title={item.title}>
-          {item.title}
+        <div className={`leading-tight font-sans truncate ${isChild ? 'text-[11.44px]' : 'text-[12.16px]'}`} title={item.title}>
+          {cleanTitle(item.title)}
         </div>
       </button>
       <div className={`absolute right-1 top-1 hidden group-hover:flex items-center gap-0.5 bg-black/30 backdrop-blur-sm rounded p-0.5 z-10`}>
@@ -376,52 +363,174 @@ const App: React.FC = () => {
     </li>
   );
 
-  const renderSidebarContent = () => {
-    const groupedStructure: (NavItem | { type: 'group'; key: string; title: string; children: NavItem[] })[] = [];
-    const orderGroupChildren: NavItem[] = [];
-    let orderGroupAdded = false;
+  // Function to generate the node structure based on data (categorization logic)
+  const getSidebarNodes = () => {
+    // Categorize items
+    const earlyIds = ["home-nav", "1766124456392", "1766127599481", "1766124649937"];
+    const lateIds = ["1765865340448", "1766025295066", "1766106789892", "1766127895281"];
+    
+    const orderChildren = items.filter(i => ORDER_MANAGEMENT_ITEMS.has(i.title));
+    const projectChildren = items.filter(i => PROJECT_MANAGEMENT_ITEMS.has(i.title));
+    const luDanItem = items.find(i => i.title === "录单大厅");
+    const shouHouItem = items.find(i => INDEPENDENT_ITEMS.has(i.title) && i.title.includes("售后"));
 
-    items.forEach(item => {
-      if (ORDER_MANAGEMENT_TITLES.has(item.title)) {
-        orderGroupChildren.push(item);
-        if (!orderGroupAdded) {
-          groupedStructure.push({
-            type: 'group',
-            key: 'group-order-management',
-            title: '订单管理',
-            children: orderGroupChildren
-          });
-          orderGroupAdded = true;
-        }
-      } else {
-        groupedStructure.push(item);
-      }
+    const nodes: SidebarNode[] = [];
+
+    // Early Top Levels
+    earlyIds.forEach(id => {
+        const it = items.find(i => i.id === id);
+        if (it) nodes.push(it);
     });
 
-    return groupedStructure.map(node => {
+    // Order Group
+    if (orderChildren.length > 0) {
+        nodes.push({ type: 'group', key: 'g-order', title: '订单管理', children: orderChildren });
+    }
+
+    // Extracted Independent Items
+    if (luDanItem) nodes.push(luDanItem);
+    if (shouHouItem) nodes.push(shouHouItem);
+
+    // Project Group 1 (Restored and positioned after After-sales)
+    if (projectChildren.length > 0) {
+        nodes.push({ type: 'group', key: 'g-project', title: '项目管理1', children: projectChildren });
+    }
+
+    // Late Top Levels
+    lateIds.forEach(id => {
+        const it = items.find(i => i.id === id);
+        if (it) nodes.push(it);
+    });
+
+    // Handle any items not explicitly categorized
+    const knownIds = new Set([...earlyIds, ...lateIds, ...(luDanItem ? [luDanItem.id] : []), ...(shouHouItem ? [shouHouItem.id] : [])]);
+    items.forEach(it => {
+        if (!knownIds.has(it.id) && !ORDER_MANAGEMENT_ITEMS.has(it.title) && !PROJECT_MANAGEMENT_ITEMS.has(it.title)) {
+            nodes.push(it);
+        }
+    });
+    
+    return nodes;
+  };
+
+  const sidebarNodes = getSidebarNodes();
+
+  // Sync sidebarOrder with generated nodes
+  useEffect(() => {
+    if (sidebarNodes.length === 0) return;
+
+    setSidebarOrder(prev => {
+        const newKeys = sidebarNodes.map(n => ('type' in n ? n.key : n.id));
+        const keptKeys = prev.filter(k => newKeys.includes(k));
+        const keptKeysSet = new Set(keptKeys);
+        const addedKeys = newKeys.filter(k => !keptKeysSet.has(k));
+        
+        const finalOrder = [...keptKeys, ...addedKeys];
+        
+        if (JSON.stringify(finalOrder) !== JSON.stringify(prev)) {
+            return finalOrder;
+        }
+        return prev;
+    });
+  }, [items]); // Update when items/nodes change
+
+  // Sort nodes based on sidebarOrder
+  const sortedSidebarNodes = [...sidebarNodes].sort((a, b) => {
+      const keyA = 'type' in a ? a.key : a.id;
+      const keyB = 'type' in b ? b.key : b.id;
+      const indexA = sidebarOrder.indexOf(keyA);
+      const indexB = sidebarOrder.indexOf(keyB);
+      if (indexA === -1) return 1;
+      if (indexB === -1) return -1;
+      return indexA - indexB;
+  });
+
+  const onDragStart = (e: React.DragEvent, index: number) => {
+      dragItem.current = index;
+      e.currentTarget.style.opacity = "0.5";
+      e.dataTransfer.effectAllowed = "move";
+  };
+
+  const onDragEnter = (e: React.DragEvent, index: number) => {
+      e.preventDefault();
+      if (dragItem.current === null) return;
+      if (dragItem.current === index) return;
+
+      const newOrder = [...sidebarOrder];
+      // We are sorting based on the rendered index, but sidebarOrder holds keys.
+      // Need to map rendered index back to keys to perform the swap correctly in the order array.
+      
+      const draggedNode = sortedSidebarNodes[dragItem.current];
+      const targetNode = sortedSidebarNodes[index];
+      
+      const draggedKey = 'type' in draggedNode ? draggedNode.key : draggedNode.id;
+      const targetKey = 'type' in targetNode ? targetNode.key : targetNode.id;
+
+      const currentDraggedIndexInOrder = newOrder.indexOf(draggedKey);
+      const currentTargetIndexInOrder = newOrder.indexOf(targetKey);
+
+      if (currentDraggedIndexInOrder !== -1 && currentTargetIndexInOrder !== -1) {
+          newOrder.splice(currentDraggedIndexInOrder, 1);
+          newOrder.splice(currentTargetIndexInOrder, 0, draggedKey);
+          setSidebarOrder(newOrder);
+          dragItem.current = index;
+      }
+  };
+
+  const onDragEnd = (e: React.DragEvent) => {
+      e.currentTarget.style.opacity = "1";
+      dragItem.current = null;
+  };
+  
+  const onDragOver = (e: React.DragEvent) => {
+      e.preventDefault();
+  };
+
+  const renderSidebarContent = () => {
+    return sortedSidebarNodes.map((node, index) => {
       if ('type' in node && node.type === 'group') {
-        if (node.children.length === 0) return null;
         const isExpanded = expandedGroups.has(node.key);
-        const hasActiveChild = node.children.some(child => child.url === activeUrl);
+        const hasActiveChild = node.children.some((child: NavItem) => child.url === activeUrl);
         return (
-          <li key={node.key} className="border-b border-white/10">
+          <li 
+            key={node.key} 
+            className="border-b border-white/10 cursor-move"
+            draggable
+            onDragStart={(e) => onDragStart(e, index)}
+            onDragEnter={(e) => onDragEnter(e, index)}
+            onDragEnd={onDragEnd}
+            onDragOver={onDragOver}
+          >
              <button 
                onClick={() => toggleGroup(node.key)} 
                className={`w-full flex flex-row items-center justify-start text-left px-3 py-[10.5px] font-bold font-sans transition-all hover:bg-blue-800 ${hasActiveChild ? 'bg-blue-700 text-white' : 'text-white/90'}`}
              >
                 <div className="shrink-0 mr-2">{renderIcon(node.title, "w-[17px] h-[17px]")}</div>
                 <div className="flex items-center gap-1 overflow-hidden">
-                    <span className="leading-tight text-[14.3px] truncate">{node.title}</span>
+                    <span className="leading-tight text-[12.16px] truncate">{cleanTitle(node.title)}</span>
                     <svg xmlns="http://www.w3.org/2000/svg" className={`h-3 w-3 shrink-0 transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`} viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" /></svg>
                 </div>
              </button>
-             <div className={`overflow-hidden transition-all duration-300 ease-in-out bg-[#0F172A] ${isExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'}`}>
-                <ul className="border-t border-white/5">{node.children.map(child => renderNavItem(child, true))}</ul>
+             <div className={`overflow-hidden transition-all duration-300 ease-in-out bg-[#0F172A] cursor-default ${isExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                <ul className="border-t border-white/5">{node.children.map((child: NavItem) => renderNavItem(child, true))}</ul>
              </div>
           </li>
         );
       } else {
-        return renderNavItem(node as NavItem);
+        const navItem = node as NavItem;
+        return (
+            <div
+                key={navItem.id}
+                draggable
+                onDragStart={(e) => onDragStart(e, index)}
+                onDragEnter={(e) => onDragEnter(e, index)}
+                onDragEnd={onDragEnd}
+                onDragOver={onDragOver}
+                className="cursor-move"
+            >
+                {renderNavItem(navItem)}
+            </div>
+        );
       }
     });
   };
@@ -441,7 +550,7 @@ const App: React.FC = () => {
                 <div className="p-2 border-t border-white/10 bg-black/10">
                     <button 
                         onClick={() => { setEditingItem(null); setIsModalOpen(true); }} 
-                        className="w-full flex flex-row items-center justify-center gap-2 py-1.5 bg-white/10 border border-white/20 text-white rounded text-[12.1px] font-sans hover:bg-blue-600 hover:border-blue-400 transition-all shadow-sm"
+                        className="w-full flex flex-row items-center justify-center gap-2 py-1.5 bg-white/10 border border-white/20 text-white rounded text-[10.29px] font-sans hover:bg-blue-600 hover:border-blue-400 transition-all shadow-sm"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
                         <span className="truncate">初始化模块</span>
