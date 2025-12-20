@@ -15,6 +15,36 @@ const DEFAULT_DATA: NavItem[] = [
     "timestamp": 1715000000001
   },
   {
+    "id": "1766216698492",
+    "url": "https://paidanyuan.pages.dev/",
+    "title": "派单大厅",
+    "timestamp": 1766216698492
+  },
+  {
+    "id": "5",
+    "url": "https://ludandating.pages.dev/",
+    "title": "录单大厅",
+    "timestamp": 1765770834252
+  },
+  {
+    "id": "4",
+    "url": "https://shouhouguanli.pages.dev/",
+    "title": "售后管理页",
+    "timestamp": 1715000000000
+  },
+  {
+    "id": "1766221507325",
+    "url": "https://dingdanguanli2.pages.dev/",
+    "title": "订单管理 ",
+    "timestamp": 1766221507325
+  },
+  {
+    "id": "1766202927722",
+    "url": "https://xiangmuguanli.pages.dev/",
+    "title": "项目管理",
+    "timestamp": 1766202927722
+  },
+  {
     "id": "1766124456392",
     "url": "https://gongzuoribao.pages.dev/",
     "title": "工作日报",
@@ -31,18 +61,6 @@ const DEFAULT_DATA: NavItem[] = [
     "url": "https://disanfangdianpu.pages.dev/",
     "title": "第三方店铺",
     "timestamp": 1766124649937
-  },
-  {
-    "id": "4",
-    "url": "https://shouhouguanli.pages.dev/",
-    "title": "售后管理页",
-    "timestamp": 1715000000000
-  },
-  {
-    "id": "5",
-    "url": "https://ludandating.pages.dev/",
-    "title": "录单大厅",
-    "timestamp": 1765770834252
   },
   {
     "id": "1765865340448",
@@ -67,24 +85,6 @@ const DEFAULT_DATA: NavItem[] = [
     "url": "https://yingxiaoguanli.pages.dev/",
     "title": "营销管理",
     "timestamp": 1766127895281
-  },
-  {
-    "id": "1766202927722",
-    "url": "https://xiangmuguanli.pages.dev/",
-    "title": "项目管理",
-    "timestamp": 1766202927722
-  },
-  {
-    "id": "1766216698492",
-    "url": "https://paidanyuan.pages.dev/",
-    "title": "派单大厅",
-    "timestamp": 1766216698492
-  },
-  {
-    "id": "1766221507325",
-    "url": "https://dingdanguanli2.pages.dev/",
-    "title": "订单管理 ",
-    "timestamp": 1766221507325
   }
 ];
 
@@ -267,76 +267,60 @@ const App: React.FC = () => {
     return <svg {...iconProps}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
   };
 
-  const renderNavItem = (item: NavItem, isChild = false) => (
-    <li key={item.id} className="relative group border-b border-white/10 last:border-0">
-      <button
-        onClick={() => setActiveUrl(item.url)}
-        className={`w-full flex flex-row items-center justify-start text-left px-3 transition-all border-l-4 py-[10.5px] ${
-          activeUrl === item.url 
-          ? 'border-blue-400 bg-blue-600 text-white' 
-          : 'border-transparent text-white/80 hover:bg-blue-800 hover:text-white'
-        }`}
-      >
-        <div className="shrink-0 mr-2">
-          {renderIcon(item.title, isChild ? "w-[11px] h-[11px]" : "w-[17px] h-[17px]")}
-        </div>
-        <div className={`leading-tight font-sans truncate ${isChild ? 'text-[11.44px]' : 'text-[12.16px]'}`} title={item.title}>
-          {cleanTitle(item.title)}
-        </div>
-      </button>
-      <div className={`absolute right-1 top-1 hidden group-hover:flex items-center gap-0.5 bg-black/30 backdrop-blur-sm rounded p-0.5 z-10`}>
-        <button onClick={(e) => { e.stopPropagation(); handleEditClick(item); }} className="p-0.5 text-white/50 hover:text-blue-300 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button>
-        <button onClick={(e) => { e.stopPropagation(); handleDeleteItem(item.id); }} className="p-0.5 text-white/50 hover:text-red-400 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button>
-      </div>
-    </li>
-  );
-
   // Function to generate the node structure based on data (categorization logic)
   const getSidebarNodes = () => {
-    // Categorize items
-    const earlyIds = ["home-nav", "1766124456392", "1766127599481", "1766124649937"];
-    const lateIds = ["1765865340448", "1766025295066", "1766106789892", "1766127895281"];
-    
-    const orderChildren = items.filter(i => ORDER_MANAGEMENT_ITEMS.has(i.title));
-    const projectChildren = items.filter(i => PROJECT_MANAGEMENT_ITEMS.has(i.title));
-    const luDanItem = items.find(i => i.title === "录单大厅");
-    const shouHouItem = items.find(i => INDEPENDENT_ITEMS.has(i.title) && i.title.includes("售后"));
+    // Defined sort order as requested
+    const orderedIds = [
+      "home-nav",        // 首页导航
+      "1766216698492",   // 派单大厅
+      "5",               // 录单大厅
+      "4",               // 售后管理页
+      "1766221507325",   // 订单管理
+      "1766202927722",   // 项目管理
+      "1766124456392",   // 工作日报
+      "1766127599481",   // 数据管理
+      "1766124649937",   // 第三方店铺
+      "1765865340448",   // 师傅管理
+      "1766025295066",   // 权限管理
+      "1766106789892",   // 财务管理
+      "1766127895281",   // 营销管理
+    ];
 
     const nodes: SidebarNode[] = [];
+    const processedIds = new Set<string>();
 
-    // Early Top Levels
-    earlyIds.forEach(id => {
-        const it = items.find(i => i.id === id);
-        if (it) nodes.push(it);
+    // Add ordered items
+    orderedIds.forEach(id => {
+      const item = items.find(i => i.id === id);
+      if (item) {
+        nodes.push(item);
+        processedIds.add(id);
+      }
     });
 
-    // Order Group
-    if (orderChildren.length > 0) {
-        nodes.push({ type: 'group', key: 'g-order', title: '订单管理', children: orderChildren });
-    }
+    // Handle any remaining items (fallback logic)
+    const remainingItems = items.filter(i => !processedIds.has(i.id));
+    if (remainingItems.length > 0) {
+        const orderChildren = remainingItems.filter(i => ORDER_MANAGEMENT_ITEMS.has(i.title));
+        const projectChildren = remainingItems.filter(i => PROJECT_MANAGEMENT_ITEMS.has(i.title));
+        const remainingProcessed = new Set<string>();
 
-    // Extracted Independent Items
-    if (luDanItem) nodes.push(luDanItem);
-    if (shouHouItem) nodes.push(shouHouItem);
-
-    // Project Group 1 (Restored and positioned after After-sales)
-    if (projectChildren.length > 0) {
-        nodes.push({ type: 'group', key: 'g-project', title: '项目管理1', children: projectChildren });
-    }
-
-    // Late Top Levels
-    lateIds.forEach(id => {
-        const it = items.find(i => i.id === id);
-        if (it) nodes.push(it);
-    });
-
-    // Handle any items not explicitly categorized
-    const knownIds = new Set([...earlyIds, ...lateIds, ...(luDanItem ? [luDanItem.id] : []), ...(shouHouItem ? [shouHouItem.id] : [])]);
-    items.forEach(it => {
-        if (!knownIds.has(it.id) && !ORDER_MANAGEMENT_ITEMS.has(it.title) && !PROJECT_MANAGEMENT_ITEMS.has(it.title)) {
-            nodes.push(it);
+        if (orderChildren.length > 0) {
+            nodes.push({ type: 'group', key: 'g-order', title: '订单管理', children: orderChildren });
+            orderChildren.forEach(i => remainingProcessed.add(i.id));
         }
-    });
+        
+        if (projectChildren.length > 0) {
+            nodes.push({ type: 'group', key: 'g-project', title: '项目管理', children: projectChildren });
+            projectChildren.forEach(i => remainingProcessed.add(i.id));
+        }
+        
+        remainingItems.forEach(item => {
+            if (!remainingProcessed.has(item.id)) {
+                nodes.push(item);
+            }
+        });
+    }
     
     return nodes;
   };
@@ -414,6 +398,34 @@ const App: React.FC = () => {
       e.preventDefault();
   };
 
+  const renderNavItem = (item: NavItem, isChild = false) => {
+    const isActive = activeUrl === item.url;
+    return (
+        <div className="group relative">
+            <button
+                onClick={() => setActiveUrl(item.url)}
+                className={`w-full flex flex-row items-center justify-start text-left font-sans transition-all hover:bg-white/5
+                    ${isChild ? 'py-2 px-3 pl-9 text-[11px] text-slate-400' : 'py-[10.5px] px-3 text-[12.16px] font-bold text-white/90'}
+                    ${isActive ? (isChild ? 'text-blue-400 bg-white/5' : 'bg-blue-700 text-white') : ''}
+                `}
+            >
+                <div className={`shrink-0 ${isChild ? 'mr-2' : 'mr-2'}`}>
+                    {renderIcon(item.title, isChild ? "w-3.5 h-3.5" : "w-[17px] h-[17px]")}
+                </div>
+                <span className="truncate leading-tight flex-1">{item.title}</span>
+            </button>
+            <div className={`absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ${isActive ? 'text-white' : 'text-slate-400'}`}>
+                <button onClick={(e) => {e.stopPropagation(); handleEditClick(item);}} className="p-1 hover:bg-white/20 rounded">
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                </button>
+                 <button onClick={(e) => {e.stopPropagation(); if(confirm('确认删除？')) handleDeleteItem(item.id);}} className="p-1 hover:bg-white/20 rounded hover:text-red-400">
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+        </div>
+    );
+  };
+
   const renderSidebarContent = () => {
     return sortedSidebarNodes.map((node, index) => {
       if ('type' in node && node.type === 'group') {
@@ -440,24 +452,24 @@ const App: React.FC = () => {
                 </div>
              </button>
              <div className={`overflow-hidden transition-all duration-300 ease-in-out bg-[#0F172A] cursor-default ${isExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'}`}>
-                <ul className="border-t border-white/5">{node.children.map((child: NavItem) => renderNavItem(child, true))}</ul>
+                <ul className="border-t border-white/5">{node.children.map((child: NavItem) => <li key={child.id}>{renderNavItem(child, true)}</li>)}</ul>
              </div>
           </li>
         );
       } else {
         const navItem = node as NavItem;
         return (
-            <div
+            <li
                 key={navItem.id}
                 draggable
                 onDragStart={(e) => onDragStart(e, index)}
                 onDragEnter={(e) => onDragEnter(e, index)}
                 onDragEnd={onDragEnd}
                 onDragOver={onDragOver}
-                className="cursor-move"
+                className="cursor-move border-b border-white/10"
             >
                 {renderNavItem(navItem)}
-            </div>
+            </li>
         );
       }
     });
