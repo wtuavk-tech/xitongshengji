@@ -29,7 +29,7 @@ const DEFAULT_DATA: NavItem[] = [
   {
     "id": "4",
     "url": "https://shouhouguanli.pages.dev/",
-    "title": "售后管理页",
+    "title": "售后管理",
     "timestamp": 1715000000000
   },
   {
