@@ -267,6 +267,83 @@ const App: React.FC = () => {
     return <svg {...iconProps}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
   };
 
+  const renderNavItem = (item: NavItem, isChild = false) => {
+    const isActive = activeUrl === item.url;
+    return (
+        <div className="group relative">
+            <button
+                onClick={() => setActiveUrl(item.url)}
+                className={`w-full flex flex-row items-center justify-start text-left font-sans transition-all hover:bg-white/5
+                    ${isChild ? 'py-2 px-3 pl-9 text-[11px] text-slate-400' : 'py-[10.5px] px-3 text-[12.16px] font-bold text-white/90'}
+                    ${isActive ? (isChild ? 'text-blue-400 bg-white/5' : 'bg-blue-700 text-white') : ''}
+                `}
+            >
+                <div className={`shrink-0 ${isChild ? 'mr-2' : 'mr-2'}`}>
+                    {renderIcon(item.title, isChild ? "w-3.5 h-3.5" : "w-[17px] h-[17px]")}
+                </div>
+                <span className="truncate leading-tight flex-1">{item.title}</span>
+            </button>
+            <div className={`absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ${isActive ? 'text-white' : 'text-slate-400'}`}>
+                <button onClick={(e) => {e.stopPropagation(); handleEditClick(item);}} className="p-1 hover:bg-white/20 rounded">
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                </button>
+                 <button onClick={(e) => {e.stopPropagation(); if(confirm('确认删除？')) handleDeleteItem(item.id);}} className="p-1 hover:bg-white/20 rounded hover:text-red-400">
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+        </div>
+    );
+  };
+
+  const renderSidebarContent = () => {
+    return sortedSidebarNodes.map((node, index) => {
+      if ('type' in node && node.type === 'group') {
+        const isExpanded = expandedGroups.has(node.key);
+        const hasActiveChild = node.children.some((child: NavItem) => child.url === activeUrl);
+        return (
+          <li 
+            key={node.key} 
+            className="border-b border-white/10 cursor-move"
+            draggable
+            onDragStart={(e) => onDragStart(e, index)}
+            onDragEnter={(e) => onDragEnter(e, index)}
+            onDragEnd={onDragEnd}
+            onDragOver={onDragOver}
+          >
+             <button 
+               onClick={() => toggleGroup(node.key)} 
+               className={`w-full flex flex-row items-center justify-start text-left px-3 py-[10.5px] font-bold font-sans transition-all hover:bg-blue-800 ${hasActiveChild ? 'bg-blue-700 text-white' : 'text-white/90'}`}
+             >
+                <div className="shrink-0 mr-2">{renderIcon(node.title, "w-[17px] h-[17px]")}</div>
+                <div className="flex items-center gap-1 overflow-hidden">
+                    <span className="leading-tight text-[12.16px] truncate">{cleanTitle(node.title)}</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" className={`h-3 w-3 shrink-0 transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`} viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" /></svg>
+                </div>
+             </button>
+             <div className={`overflow-hidden transition-all duration-300 ease-in-out bg-[#0F172A] cursor-default ${isExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                <ul className="border-t border-white/5">{node.children.map((child: NavItem) => <li key={child.id}>{renderNavItem(child, true)}</li>)}</ul>
+             </div>
+          </li>
+        );
+      } else {
+        const navItem = node as NavItem;
+        return (
+            <li
+                key={navItem.id}
+                draggable
+                onDragStart={(e) => onDragStart(e, index)}
+                onDragEnter={(e) => onDragEnter(e, index)}
+                onDragEnd={onDragEnd}
+                onDragOver={onDragOver}
+                className="cursor-move border-b border-white/10"
+            >
+                {renderNavItem(navItem)}
+            </li>
+        );
+      }
+    });
+  };
+
   // Function to generate the node structure based on data (categorization logic)
   const getSidebarNodes = () => {
     // Defined sort order as requested
@@ -398,102 +475,30 @@ const App: React.FC = () => {
       e.preventDefault();
   };
 
-  const renderNavItem = (item: NavItem, isChild = false) => {
-    const isActive = activeUrl === item.url;
-    return (
-        <div className="group relative">
-            <button
-                onClick={() => setActiveUrl(item.url)}
-                className={`w-full flex flex-row items-center justify-start text-left font-sans transition-all hover:bg-white/5
-                    ${isChild ? 'py-2 px-3 pl-9 text-[11px] text-slate-400' : 'py-[10.5px] px-3 text-[12.16px] font-bold text-white/90'}
-                    ${isActive ? (isChild ? 'text-blue-400 bg-white/5' : 'bg-blue-700 text-white') : ''}
-                `}
-            >
-                <div className={`shrink-0 ${isChild ? 'mr-2' : 'mr-2'}`}>
-                    {renderIcon(item.title, isChild ? "w-3.5 h-3.5" : "w-[17px] h-[17px]")}
-                </div>
-                <span className="truncate leading-tight flex-1">{item.title}</span>
-            </button>
-            <div className={`absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ${isActive ? 'text-white' : 'text-slate-400'}`}>
-                <button onClick={(e) => {e.stopPropagation(); handleEditClick(item);}} className="p-1 hover:bg-white/20 rounded">
-                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-                </button>
-                 <button onClick={(e) => {e.stopPropagation(); if(confirm('确认删除？')) handleDeleteItem(item.id);}} className="p-1 hover:bg-white/20 rounded hover:text-red-400">
-                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
-            </div>
-        </div>
-    );
-  };
-
-  const renderSidebarContent = () => {
-    return sortedSidebarNodes.map((node, index) => {
-      if ('type' in node && node.type === 'group') {
-        const isExpanded = expandedGroups.has(node.key);
-        const hasActiveChild = node.children.some((child: NavItem) => child.url === activeUrl);
-        return (
-          <li 
-            key={node.key} 
-            className="border-b border-white/10 cursor-move"
-            draggable
-            onDragStart={(e) => onDragStart(e, index)}
-            onDragEnter={(e) => onDragEnter(e, index)}
-            onDragEnd={onDragEnd}
-            onDragOver={onDragOver}
-          >
-             <button 
-               onClick={() => toggleGroup(node.key)} 
-               className={`w-full flex flex-row items-center justify-start text-left px-3 py-[10.5px] font-bold font-sans transition-all hover:bg-blue-800 ${hasActiveChild ? 'bg-blue-700 text-white' : 'text-white/90'}`}
-             >
-                <div className="shrink-0 mr-2">{renderIcon(node.title, "w-[17px] h-[17px]")}</div>
-                <div className="flex items-center gap-1 overflow-hidden">
-                    <span className="leading-tight text-[12.16px] truncate">{cleanTitle(node.title)}</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" className={`h-3 w-3 shrink-0 transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`} viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" /></svg>
-                </div>
-             </button>
-             <div className={`overflow-hidden transition-all duration-300 ease-in-out bg-[#0F172A] cursor-default ${isExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'}`}>
-                <ul className="border-t border-white/5">{node.children.map((child: NavItem) => <li key={child.id}>{renderNavItem(child, true)}</li>)}</ul>
-             </div>
-          </li>
-        );
-      } else {
-        const navItem = node as NavItem;
-        return (
-            <li
-                key={navItem.id}
-                draggable
-                onDragStart={(e) => onDragStart(e, index)}
-                onDragEnter={(e) => onDragEnter(e, index)}
-                onDragEnd={onDragEnd}
-                onDragOver={onDragOver}
-                className="cursor-move border-b border-white/10"
-            >
-                {renderNavItem(navItem)}
-            </li>
-        );
-      }
-    });
-  };
 
   return (
     <div className="flex flex-col h-screen w-full overflow-hidden bg-slate-100 font-sans">
-        <header className="flex items-center justify-between px-4 bg-slate-900 text-white shrink-0 h-10 shadow-md z-30">
-            <div className="font-bold text-sm tracking-wide truncate">急修到家系统升级优化</div>
-            <div className="flex items-center gap-2">
-                 <button onClick={handleResetToServer} className="flex items-center gap-1 px-2 py-1 border border-slate-600 bg-slate-800/50 hover:bg-slate-700 text-slate-300 rounded text-[10px] font-medium transition-all"><svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg><span>重置/刷新</span></button>
-                 <button onClick={() => setIsExportModalOpen(true)} className="flex items-center gap-1 px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-[10px] font-medium transition-all"><svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg><span>生成部署配置</span></button>
-            </div>
-        </header>
+        {/* Header Removed as requested */}
         <div className="flex flex-1 overflow-hidden">
             <aside className="w-[122px] bg-[#001529] border-r border-white/10 flex flex-col shrink-0 z-20 transition-all duration-300">
                 <div className="flex-1 overflow-y-auto custom-scrollbar"><ul className="py-0">{renderSidebarContent()}</ul></div>
-                <div className="p-2 border-t border-white/10 bg-black/10">
+                <div className="p-2 border-t border-white/10 bg-black/10 flex flex-col gap-2">
                     <button 
                         onClick={() => { setEditingItem(null); setIsModalOpen(true); }} 
                         className="w-full flex flex-row items-center justify-center gap-2 py-1.5 bg-white/10 border border-white/20 text-white rounded text-[10.29px] font-sans hover:bg-blue-600 hover:border-blue-400 transition-all shadow-sm"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
                         <span className="truncate">初始化模块</span>
+                    </button>
+
+                    <button onClick={handleResetToServer} className="w-full flex items-center justify-center gap-1 py-1.5 border border-slate-600 bg-slate-800/50 hover:bg-slate-700 text-slate-300 rounded text-[10px] font-medium transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                        <span>重置/刷新</span>
+                    </button>
+
+                    <button onClick={() => setIsExportModalOpen(true)} className="w-full flex items-center justify-center gap-1 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-[10px] font-medium transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                        <span>生成部署配置</span>
                     </button>
                 </div>
             </aside>
