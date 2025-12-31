@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import AddModal from './components/AddModal';
 import ExportModal from './components/ExportModal';
 import { NavItem } from './types';
@@ -16,7 +16,7 @@ const DEFAULT_DATA: NavItem[] = [
   },
   {
     "id": "1766216698492",
-    "url": "https://paidanyuan.pages.dev/",
+    "url": "https://paidandating2.pages.dev/",
     "title": "派单大厅",
     "timestamp": 1766216698492
   },
@@ -46,7 +46,7 @@ const DEFAULT_DATA: NavItem[] = [
   },
   {
     "id": "1766124456392",
-    "url": "https://gongzuoribao.pages.dev/",
+    "url": "https://yemianbiaoge2.pages.dev/",
     "title": "工作日报",
     "timestamp": 1766124456392
   },
@@ -89,16 +89,7 @@ const DEFAULT_DATA: NavItem[] = [
 ];
 
 // Helper to clean titles
-const cleanTitle = (title: string) => title.replace(/页$/, '');
-
-const ORDER_MANAGEMENT_ITEMS = new Set([
-  "派单员页", "待入单库", "订单收款页", "报错订单页", "直派订单页", 
-  "派单业绩", "单库页", "原始订单页", "长期订单页", "转派记录页", 
-  "派单记录页", "录单价格页", "报价页", "订单管理页", "订单管理", 
-  "订单收款", "报错订单", "直排订单", "直派订单", "单库", 
-  "原始订单", "长期订单", "转派记录", "派单记录", "改单记录", "改单记录页", 
-  "录单价格", "报价"
-]);
+const cleanTitle = (title: string) => (title || '').replace(/页$/, '');
 
 const PROJECT_MANAGEMENT_ITEMS = new Set([
   "地域项目价格", "地域项目价格页", "好评返现", "用户黑名单", "项目质保"
@@ -116,7 +107,8 @@ const App: React.FC = () => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
       }
     } catch (e) {
       console.error("读取本地缓存失败", e);
@@ -125,12 +117,12 @@ const App: React.FC = () => {
   });
 
   const [activeUrl, setActiveUrl] = useState<string | null>(() => {
-    if (items && items.length > 0) return items[0].url;
+    if (Array.isArray(items) && items.length > 0) return items[0].url;
     return null;
   });
 
   useEffect(() => {
-    if (!activeUrl && items.length > 0) {
+    if (!activeUrl && Array.isArray(items) && items.length > 0) {
       setActiveUrl(items[0].url);
     }
   }, [items]);
@@ -148,6 +140,86 @@ const App: React.FC = () => {
   const [sidebarOrder, setSidebarOrder] = useState<string[]>([]);
   const dragItem = useRef<number | null>(null);
   const dragOverItem = useRef<number | null>(null);
+
+  const sortedSidebarNodes = useMemo<SidebarNode[]>(() => {
+    if (!Array.isArray(items)) return [];
+    
+    const projectGroup: { type: 'group'; key: string; title: string; children: NavItem[] } = { 
+      type: 'group', key: 'project_mgmt', title: '项目中心', children: [] 
+    };
+    
+    const plainNodes: NavItem[] = [];
+
+    items.forEach(item => {
+      if (!item || !item.title) return;
+      const t = cleanTitle(item.title).trim();
+      
+      if (PROJECT_MANAGEMENT_ITEMS.has(t)) {
+        projectGroup.children.push(item);
+      } else {
+        plainNodes.push(item);
+      }
+    });
+
+    const result: SidebarNode[] = [];
+    if (projectGroup.children.length > 0) result.push(projectGroup);
+    result.push(...plainNodes);
+
+    if (sidebarOrder.length > 0) {
+      result.sort((a, b) => {
+        const keyA = ('key' in a) ? a.key : a.id;
+        const keyB = ('key' in b) ? b.key : b.id;
+        const indexA = sidebarOrder.indexOf(keyA);
+        const indexB = sidebarOrder.indexOf(keyB);
+        
+        if (indexA === -1 && indexB === -1) return 0;
+        if (indexA === -1) return 1;
+        if (indexB === -1) return -1;
+        return indexA - indexB;
+      });
+    }
+
+    return result;
+  }, [items, sidebarOrder]);
+
+  const onDragStart = (e: React.DragEvent, position: number) => {
+    dragItem.current = position;
+    if (e.currentTarget instanceof HTMLElement) {
+       e.currentTarget.style.opacity = "0.5";
+    }
+  };
+
+  const onDragEnter = (e: React.DragEvent, position: number) => {
+    e.preventDefault();
+    dragOverItem.current = position;
+  };
+
+  const onDragEnd = (e: React.DragEvent) => {
+     if (e.currentTarget instanceof HTMLElement) {
+       e.currentTarget.style.opacity = "1";
+    }
+    const dragIndex = dragItem.current;
+    const dragOverIndex = dragOverItem.current;
+
+    if (dragIndex !== null && dragOverIndex !== null && dragIndex !== dragOverIndex) {
+      const newNodes = [...sortedSidebarNodes];
+      // Ensure indices are valid
+      if(newNodes[dragIndex] && newNodes[dragOverIndex]) {
+          const draggedItem = newNodes[dragIndex];
+          newNodes.splice(dragIndex, 1);
+          newNodes.splice(dragOverIndex, 0, draggedItem);
+          
+          const newOrder = newNodes.map(node => ('key' in node) ? node.key : node.id);
+          setSidebarOrder(newOrder);
+      }
+    }
+    dragItem.current = null;
+    dragOverItem.current = null;
+  };
+
+  const onDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
 
   const toggleGroup = (groupKey: string) => {
     setExpandedGroups(prev => {
@@ -181,9 +253,22 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const initData = async () => {
-      if (localStorage.getItem(STORAGE_KEY)) {
-        return;
+      // Check if local storage exists
+      const local = localStorage.getItem(STORAGE_KEY);
+      if (local) {
+          try {
+              if(!Array.isArray(JSON.parse(local))) {
+                  // If local storage is invalid (not array), load from server
+                  const serverData = await fetchServerData();
+                  if (serverData) setItems(serverData);
+              }
+          } catch(e) {
+              const serverData = await fetchServerData();
+              if (serverData) setItems(serverData);
+          }
+          return;
       }
+      
       const serverData = await fetchServerData();
       if (serverData) {
         setItems(serverData);
@@ -252,7 +337,7 @@ const App: React.FC = () => {
 
   const renderIcon = (title: string, sizeClass = "w-[17px] h-[17px]") => {
     const iconProps = { className: sizeClass, fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" };
-    const t = cleanTitle(title);
+    const t = cleanTitle(title || '');
     if (t.includes('首页')) return <svg {...iconProps}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>;
     if (t.includes('日报')) return <svg {...iconProps}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>;
     if (t.includes('数据管理') || t.includes('项目')) return <svg {...iconProps}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" /></svg>;
@@ -270,25 +355,44 @@ const App: React.FC = () => {
   const renderNavItem = (item: NavItem, isChild = false) => {
     const isActive = activeUrl === item.url;
     return (
-        <div className="group relative">
-            <button
-                onClick={() => setActiveUrl(item.url)}
-                className={`w-full flex flex-row items-center justify-start text-left font-sans transition-all hover:bg-white/5
-                    ${isChild ? 'py-2 px-3 pl-9 text-[11px] text-slate-400' : 'py-[10.5px] px-3 text-[12.16px] font-bold text-white/90'}
-                    ${isActive ? (isChild ? 'text-blue-400 bg-white/5' : 'bg-blue-700 text-white') : ''}
-                `}
-            >
-                <div className={`shrink-0 ${isChild ? 'mr-2' : 'mr-2'}`}>
-                    {renderIcon(item.title, isChild ? "w-3.5 h-3.5" : "w-[17px] h-[17px]")}
-                </div>
-                <span className="truncate leading-tight flex-1">{item.title}</span>
-            </button>
-            <div className={`absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ${isActive ? 'text-white' : 'text-slate-400'}`}>
-                <button onClick={(e) => {e.stopPropagation(); handleEditClick(item);}} className="p-1 hover:bg-white/20 rounded">
-                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+        <div 
+            className={`group relative flex items-center ${isChild ? 'pl-8' : 'pl-3'} pr-2 py-2.5 hover:bg-white/5 transition-all duration-200 cursor-pointer ${isActive ? 'bg-blue-600/10 border-r-[3px] border-blue-500' : 'border-r-[3px] border-transparent'}`}
+            onClick={() => setActiveUrl(item.url)}
+        >
+            <div className={`shrink-0 mr-3 transition-colors ${isActive ? 'text-blue-400' : 'text-slate-500 group-hover:text-slate-300'}`}>
+                {renderIcon(item.title)}
+            </div>
+            <span className={`flex-1 truncate text-[13px] font-medium transition-colors ${isActive ? 'text-blue-100' : 'text-slate-400 group-hover:text-slate-200'}`}>
+                {cleanTitle(item.title)}
+            </span>
+
+            {/* Hover Actions */}
+            <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-[#001529]/90 backdrop-blur-sm rounded px-1">
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditClick(item);
+                    }}
+                    className="p-1 text-slate-500 hover:text-blue-400 hover:bg-white/10 rounded transition-colors"
+                    title="编辑"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                    </svg>
                 </button>
-                 <button onClick={(e) => {e.stopPropagation(); if(confirm('确认删除？')) handleDeleteItem(item.id);}} className="p-1 hover:bg-white/20 rounded hover:text-red-400">
-                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        if (window.confirm('确定要删除此导航项吗？')) {
+                            handleDeleteItem(item.id);
+                        }
+                    }}
+                    className="p-1 text-slate-500 hover:text-red-400 hover:bg-white/10 rounded transition-colors"
+                    title="删除"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
                 </button>
             </div>
         </div>
@@ -312,10 +416,10 @@ const App: React.FC = () => {
           >
              <button 
                onClick={() => toggleGroup(node.key)} 
-               className={`w-full flex flex-row items-center justify-start text-left px-3 py-[10.5px] font-bold font-sans transition-all hover:bg-blue-800 ${hasActiveChild ? 'bg-blue-700 text-white' : 'text-white/90'}`}
+               className={`w-full flex flex-row items-center justify-center text-center px-3 py-[10.5px] font-bold font-sans transition-all hover:bg-blue-800 ${hasActiveChild ? 'bg-blue-700 text-white' : 'text-white/90'}`}
              >
                 <div className="shrink-0 mr-2">{renderIcon(node.title, "w-[17px] h-[17px]")}</div>
-                <div className="flex items-center gap-1 overflow-hidden">
+                <div className="flex items-center gap-1 overflow-hidden justify-center">
                     <span className="leading-tight text-[12.16px] truncate">{cleanTitle(node.title)}</span>
                     <svg xmlns="http://www.w3.org/2000/svg" className={`h-3 w-3 shrink-0 transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`} viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" /></svg>
                 </div>
@@ -344,141 +448,9 @@ const App: React.FC = () => {
     });
   };
 
-  // Function to generate the node structure based on data (categorization logic)
-  const getSidebarNodes = () => {
-    // Defined sort order as requested
-    const orderedIds = [
-      "home-nav",        // 首页导航
-      "1766216698492",   // 派单大厅
-      "5",               // 录单大厅
-      "4",               // 售后管理页
-      "1766221507325",   // 订单管理
-      "1766202927722",   // 项目管理
-      "1766124456392",   // 工作日报
-      "1766127599481",   // 数据管理
-      "1766124649937",   // 第三方店铺
-      "1765865340448",   // 师傅管理
-      "1766025295066",   // 权限管理
-      "1766106789892",   // 财务管理
-      "1766127895281",   // 营销管理
-    ];
-
-    const nodes: SidebarNode[] = [];
-    const processedIds = new Set<string>();
-
-    // Add ordered items
-    orderedIds.forEach(id => {
-      const item = items.find(i => i.id === id);
-      if (item) {
-        nodes.push(item);
-        processedIds.add(id);
-      }
-    });
-
-    // Handle any remaining items (fallback logic)
-    const remainingItems = items.filter(i => !processedIds.has(i.id));
-    if (remainingItems.length > 0) {
-        const orderChildren = remainingItems.filter(i => ORDER_MANAGEMENT_ITEMS.has(i.title));
-        const projectChildren = remainingItems.filter(i => PROJECT_MANAGEMENT_ITEMS.has(i.title));
-        const remainingProcessed = new Set<string>();
-
-        if (orderChildren.length > 0) {
-            nodes.push({ type: 'group', key: 'g-order', title: '订单管理', children: orderChildren });
-            orderChildren.forEach(i => remainingProcessed.add(i.id));
-        }
-        
-        if (projectChildren.length > 0) {
-            nodes.push({ type: 'group', key: 'g-project', title: '项目管理', children: projectChildren });
-            projectChildren.forEach(i => remainingProcessed.add(i.id));
-        }
-        
-        remainingItems.forEach(item => {
-            if (!remainingProcessed.has(item.id)) {
-                nodes.push(item);
-            }
-        });
-    }
-    
-    return nodes;
-  };
-
-  const sidebarNodes = getSidebarNodes();
-
-  // Sync sidebarOrder with generated nodes
-  useEffect(() => {
-    if (sidebarNodes.length === 0) return;
-
-    setSidebarOrder(prev => {
-        const newKeys = sidebarNodes.map(n => ('type' in n ? n.key : n.id));
-        const keptKeys = prev.filter(k => newKeys.includes(k));
-        const keptKeysSet = new Set(keptKeys);
-        const addedKeys = newKeys.filter(k => !keptKeysSet.has(k));
-        
-        const finalOrder = [...keptKeys, ...addedKeys];
-        
-        if (JSON.stringify(finalOrder) !== JSON.stringify(prev)) {
-            return finalOrder;
-        }
-        return prev;
-    });
-  }, [items]); // Update when items/nodes change
-
-  // Sort nodes based on sidebarOrder
-  const sortedSidebarNodes = [...sidebarNodes].sort((a, b) => {
-      const keyA = 'type' in a ? a.key : a.id;
-      const keyB = 'type' in b ? b.key : b.id;
-      const indexA = sidebarOrder.indexOf(keyA);
-      const indexB = sidebarOrder.indexOf(keyB);
-      if (indexA === -1) return 1;
-      if (indexB === -1) return -1;
-      return indexA - indexB;
-  });
-
-  const onDragStart = (e: React.DragEvent, index: number) => {
-      dragItem.current = index;
-      e.currentTarget.style.opacity = "0.5";
-      e.dataTransfer.effectAllowed = "move";
-  };
-
-  const onDragEnter = (e: React.DragEvent, index: number) => {
-      e.preventDefault();
-      if (dragItem.current === null) return;
-      if (dragItem.current === index) return;
-
-      const newOrder = [...sidebarOrder];
-      // We are sorting based on the rendered index, but sidebarOrder holds keys.
-      // Need to map rendered index back to keys to perform the swap correctly in the order array.
-      
-      const draggedNode = sortedSidebarNodes[dragItem.current];
-      const targetNode = sortedSidebarNodes[index];
-      
-      const draggedKey = 'type' in draggedNode ? draggedNode.key : draggedNode.id;
-      const targetKey = 'type' in targetNode ? targetNode.key : targetNode.id;
-
-      const currentDraggedIndexInOrder = newOrder.indexOf(draggedKey);
-      const currentTargetIndexInOrder = newOrder.indexOf(targetKey);
-
-      if (currentDraggedIndexInOrder !== -1 && currentTargetIndexInOrder !== -1) {
-          newOrder.splice(currentDraggedIndexInOrder, 1);
-          newOrder.splice(currentTargetIndexInOrder, 0, draggedKey);
-          setSidebarOrder(newOrder);
-          dragItem.current = index;
-      }
-  };
-
-  const onDragEnd = (e: React.DragEvent) => {
-      e.currentTarget.style.opacity = "1";
-      dragItem.current = null;
-  };
-  
-  const onDragOver = (e: React.DragEvent) => {
-      e.preventDefault();
-  };
-
-
   return (
     <div className="flex flex-col h-screen w-full overflow-hidden bg-slate-100 font-sans">
-        {/* Header Removed as requested */}
+        <header className="h-10 bg-slate-900 shadow-md shrink-0 z-30"></header>
         <div className="flex flex-1 overflow-hidden">
             <aside className="w-[122px] bg-[#001529] border-r border-white/10 flex flex-col shrink-0 z-20 transition-all duration-300">
                 <div className="flex-1 overflow-y-auto custom-scrollbar"><ul className="py-0">{renderSidebarContent()}</ul></div>
