@@ -359,10 +359,10 @@ const App: React.FC = () => {
             className={`group relative flex items-center ${isChild ? 'pl-8' : 'pl-3'} pr-2 py-2.5 hover:bg-white/5 transition-all duration-200 cursor-pointer ${isActive ? 'bg-blue-600/10 border-r-[3px] border-blue-500' : 'border-r-[3px] border-transparent'}`}
             onClick={() => setActiveUrl(item.url)}
         >
-            <div className={`shrink-0 mr-3 transition-colors ${isActive ? 'text-blue-400' : 'text-slate-500 group-hover:text-slate-300'}`}>
+            <div className={`shrink-0 mr-3 transition-colors ${isActive ? 'text-blue-400' : 'text-white'}`}>
                 {renderIcon(item.title)}
             </div>
-            <span className={`flex-1 truncate text-[13px] font-medium transition-colors ${isActive ? 'text-blue-100' : 'text-slate-400 group-hover:text-slate-200'}`}>
+            <span className={`flex-1 truncate text-[13px] font-medium transition-colors ${isActive ? 'text-blue-100' : 'text-white'}`}>
                 {cleanTitle(item.title)}
             </span>
 
@@ -416,7 +416,7 @@ const App: React.FC = () => {
           >
              <button 
                onClick={() => toggleGroup(node.key)} 
-               className={`w-full flex flex-row items-center justify-center text-center px-3 py-[10.5px] font-bold font-sans transition-all hover:bg-blue-800 ${hasActiveChild ? 'bg-blue-700 text-white' : 'text-white/90'}`}
+               className={`w-full flex flex-row items-center justify-center text-center px-3 py-[10.5px] font-bold font-sans transition-all hover:bg-blue-800 ${hasActiveChild ? 'bg-blue-700 text-white' : 'text-white'}`}
              >
                 <div className="shrink-0 mr-2">{renderIcon(node.title, "w-[17px] h-[17px]")}</div>
                 <div className="flex items-center gap-1 overflow-hidden justify-center">
@@ -463,7 +463,7 @@ const App: React.FC = () => {
                         <span className="truncate">初始化模块</span>
                     </button>
 
-                    <button onClick={handleResetToServer} className="w-full flex items-center justify-center gap-1 py-1.5 border border-slate-600 bg-slate-800/50 hover:bg-slate-700 text-slate-300 rounded text-[10px] font-medium transition-all">
+                    <button onClick={handleResetToServer} className="w-full flex items-center justify-center gap-1 py-1.5 border border-slate-600 bg-slate-800/50 hover:bg-slate-700 text-white rounded text-[10px] font-medium transition-all">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
                         <span>重置/刷新</span>
                     </button>
