@@ -450,7 +450,6 @@ const App: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen w-full overflow-hidden bg-slate-100 font-sans">
-        <header className="h-10 bg-slate-900 shadow-md shrink-0 z-30"></header>
         <div className="flex flex-1 overflow-hidden">
             <aside className="w-[122px] bg-[#001529] border-r border-white/10 flex flex-col shrink-0 z-20 transition-all duration-300">
                 <div className="flex-1 overflow-y-auto custom-scrollbar"><ul className="py-0">{renderSidebarContent()}</ul></div>
